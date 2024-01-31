@@ -121,20 +121,66 @@ const formInputs = document.querySelectorAll("[data-form-input]");
 const formBtn = document.querySelector("[data-form-btn]");
 
 // add event to all form input field
-for (let i = 0; i < formInputs.length; i++) {
-  formInputs[i].addEventListener("input", function () {
 
-    // check form validation
-    if (form.checkValidity()) {
-      formBtn.removeAttribute("disabled");
-    } else {
-      formBtn.setAttribute("disabled", "");
-    }
 
-  });
+
+function sendRequest(webhook, fullname, email, message) {
+
+  const embed = {
+    title: 'New Message',
+    description: fullname,
+    color: 0x3498db, // Hex color code
+    fields: [
+      {
+        name: 'Email',
+        value: email,
+        inline: false,
+      },
+      {
+        name: 'Message',
+        value: message,
+        inline: false,
+      },
+    ],
+  };
+  
+  const payload = {
+    embeds: [embed],
+  };
+
+  fetch(webhook, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      console.log('Webhook sent successfully!');
+    })
+    .catch(error => console.error('Error:', error));
 }
 
+form.addEventListener('submit', function(event) {
+  event.preventDefault()
 
+  const formData = new FormData(event.target)
+
+  const fullname = formData.get("fullname")
+  const email = formData.get("email")
+  const message = formData.get("message")
+
+  document.getElementById('fullname').value = '';
+  document.getElementById('email').value = '';
+  document.getElementById('message').value = '';
+  sendRequest("https://discord.com/api/webhooks/1202192857771810897/WPv4zuTFyxxkNfBQLsdbJGk43sLTWXD0gRgGbF7_Y0xkREtJ9lirpvM8lhPPNuZlaNtZ", fullname, email, message)
+
+  document.getElementById("output-message").style.display = "block"
+
+})
 
 // page navigation variables
 const navigationLinks = document.querySelectorAll("[data-nav-link]");
